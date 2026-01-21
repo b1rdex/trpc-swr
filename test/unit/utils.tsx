@@ -12,72 +12,72 @@ import type { Server } from "node:http";
 export let PORT: number;
 
 const createAppRouterSWRHooks = (
-	config: CreateTRPCClientOptions<AppRouter>,
+  config: CreateTRPCClientOptions<AppRouter>
 ) => {
-	return createSWRProxyHooks<AppRouter>(config);
+  return createSWRProxyHooks<AppRouter>(config);
 };
 
 let server: Server;
 export let trpc: ReturnType<typeof createAppRouterSWRHooks>;
 
 beforeEach(() => {
-	trpc = createAppRouterSWRHooks({
-		links: [httpLink({ url: `http://localhost:${PORT}` })],
-	});
+  trpc = createAppRouterSWRHooks({
+    links: [httpLink({ url: `http://localhost:${PORT}` })],
+  });
 });
 
 beforeAll(async () => {
-	PORT = await getPort();
-	server = createHTTPServer({
-		router: appRouter,
-		createContext: ({ req, res }: { req: any; res: any }) => ({ req, res }),
-	});
+  PORT = await getPort();
+  server = createHTTPServer({
+    router: appRouter,
+    createContext: ({ req, res }) => ({ req, res }),
+  });
 
-	await new Promise((res) => {
-		server.listen(PORT, () => {
-			res(server);
-		});
-	});
+  await new Promise((res) => {
+    server.listen(PORT, () => {
+      res(server);
+    });
+  });
 });
 
 afterAll(async () => {
-	await new Promise<void>((resolve, reject) => {
-		server.close((err) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve();
-			}
-		});
-	});
+  await new Promise<void>((resolve, reject) => {
+    server.close((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
 });
 
 afterEach(() => {
-	cleanup();
+  cleanup();
 });
 
 export { appRouter, server };
 
 const customRender = (
-	ui: React.ReactElement,
-	options?: RenderOptions,
-): any =>
-	render(ui, {
-		wrapper: ({ children }) => {
-			const [client] = useState(() => trpc.createClient());
-			return (
-				<SWRConfig>
-					<trpc.Provider client={client}>{children}</trpc.Provider>
-				</SWRConfig>
-			);
-		},
-		...options,
-	});
+  ui: React.ReactElement,
+  options: RenderOptions = {}
+): ReturnType<typeof render> =>
+  render(ui, {
+    wrapper: ({ children }) => {
+      const [client] = useState(() => trpc.createClient());
+      return (
+        <SWRConfig>
+          <trpc.Provider client={client}>{children}</trpc.Provider>
+        </SWRConfig>
+      );
+    },
+    ...options,
+  });
 
 export * from "@testing-library/react";
 
 export const getUrl = async () => {
-	return `http://localhost:${PORT}`;
+  return `http://localhost:${PORT}`;
 };
 // override render export
 export { customRender as render };
