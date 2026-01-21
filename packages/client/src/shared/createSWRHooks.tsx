@@ -11,8 +11,9 @@ import {
   inferProcedureInput,
   inferProcedureOutput,
   TRPCRouterRecord,
+  CombinedDataTransformer,
+  DataTransformer,
 } from "@trpc/server";
-import { DataTransformerOptions } from "@trpc/server/unstable-core-do-not-import";
 import { PropsWithChildren, useContext, useEffect, useState } from "react";
 import _useSWR, {
   preload as _preload,
@@ -27,6 +28,9 @@ import _useSWRMutation, {
   SWRMutationConfiguration,
   SWRMutationResponse,
 } from "swr/mutation";
+
+// Type alias for transformer options (CombinedDataTransformer | DataTransformer)
+type DataTransformerOptions = CombinedDataTransformer | DataTransformer;
 import { CreateClient, GetQueryKey } from "./types";
 import { useTransformFallback } from "./useTransformedFallback";
 

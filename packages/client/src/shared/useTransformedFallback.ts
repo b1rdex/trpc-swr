@@ -1,6 +1,9 @@
 /* eslint-disable unicorn/filename-case */
-import type { DataTransformerOptions } from "@trpc/server/unstable-core-do-not-import";
+import type { CombinedDataTransformer, DataTransformer } from "@trpc/server";
 import { useMemo } from "react";
+
+// Type alias for transformer options (CombinedDataTransformer | DataTransformer)
+type DataTransformerOptions = CombinedDataTransformer | DataTransformer;
 
 export const useTransformFallback = (
   data: unknown,

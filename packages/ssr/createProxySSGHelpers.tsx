@@ -8,11 +8,15 @@ import {
 	TRPCRouterRecord,
 	createTRPCFlatProxy,
 	createTRPCRecursiveProxy,
+	CombinedDataTransformer,
+	DataTransformer,
 } from "@trpc/server";
-import { DataTransformerOptions } from "@trpc/server/unstable-core-do-not-import";
 
 import type { GetKey, GetQueryKey } from "@trpc-swr/client/shared";
 import { unstable_serialize } from "./serialize";
+
+// Type alias for transformer options (CombinedDataTransformer | DataTransformer)
+type DataTransformerOptions = CombinedDataTransformer | DataTransformer;
 
 /**
  * Describes the options for the `<endpoint>.fetch` method.
