@@ -1,6 +1,6 @@
 import { createTRPCFlatProxy, createTRPCRecursiveProxy } from '@trpc/server';
 import { jsx } from 'react/jsx-runtime';
-import { createTRPCClient, createTRPCProxyClient } from '@trpc/client';
+import { createTRPCClient, getUntypedClient, createTRPCProxyClient } from '@trpc/client';
 import { createContext, useMemo, useContext, useEffect, useState } from 'react';
 import _useSWR, { unstable_serialize, preload, SWRConfig } from 'swr';
 import _useSWRMutation from 'swr/mutation';
@@ -101,13 +101,15 @@ const useTransformFallback = (data, transformer)=>{
         const { nativeClient } = useTRPCContext();
         const { isDisabled, ...swrConfig } = config || {};
         return _useSWR(isDisabled ? null : pathAndInput, (pathAndInput)=>{
-            return nativeClient.query(...pathAndInput);
+            const untypedClient = getUntypedClient(nativeClient);
+            return untypedClient.query(...pathAndInput);
         }, swrConfig);
     };
     const useSWRMutation = (path, config)=>{
         const { nativeClient } = useTRPCContext();
         return _useSWRMutation(path, (path, { arg })=>{
-            return nativeClient.mutation(path, arg);
+            const untypedClient = getUntypedClient(nativeClient);
+            return untypedClient.mutation(path, arg);
         }, config);
     };
     let _clientRef = null;
@@ -139,7 +141,8 @@ const useTransformFallback = (data, transformer)=>{
             if (!_clientRef) {
                 _clientRef = createClient();
             }
-            return _clientRef.query(...pathAndInput);
+            const untypedClient = getUntypedClient(_clientRef);
+            return untypedClient.query(...pathAndInput);
         });
     };
     const getKey = (pathAndInput, unserialized = false)=>{

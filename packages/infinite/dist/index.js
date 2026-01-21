@@ -1,5 +1,6 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
+var client = require('@trpc/client');
 var server = require('@trpc/server');
 var _useSWRInfinite = require('swr/infinite');
 var shared = require('@trpc-swr/client/shared');
@@ -31,18 +32,19 @@ function createInfiniteProxyDecoration(name, hooks) {
 }
 function createSWRInfiniteHooks(trpc) {
     const useSWRInfinite = (path, getKey, config)=>{
-        const { nativeClient: client } = trpc.useContext();
+        const { nativeClient: client$1 } = trpc.useContext();
         return _useSWRInfinite__default.default((index, previousPageData)=>{
             if (config == null ? void 0 : config.isDisabled) return null;
             return getKey(index, previousPageData);
         }, (args)=>{
-            return client.query(path, args);
+            const untypedClient = client.getUntypedClient(client$1);
+            return untypedClient.query(path, args);
         }, config);
     };
     /**
 	 * Uses a preset cursor to fetch the next page. Cursor MUST exist on the input object
 	 */ const useCursor = (pathAndInput, getCursor, config)=>{
-        const { nativeClient: client } = trpc.useContext();
+        const { nativeClient: client$1 } = trpc.useContext();
         return _useSWRInfinite__default.default((index, previousPageData)=>{
             if (config == null ? void 0 : config.isDisabled) return null; // Disable
             const [path, input] = pathAndInput;
@@ -70,7 +72,8 @@ function createSWRInfiniteHooks(trpc) {
             ];
         }, (args)=>{
             const [path, input] = args;
-            return client.query(path, input);
+            const untypedClient = client.getUntypedClient(client$1);
+            return untypedClient.query(path, input);
         }, config);
     };
     return {

@@ -108,13 +108,15 @@ const useTransformFallback = (data, transformer)=>{
         const { nativeClient } = useTRPCContext();
         const { isDisabled, ...swrConfig } = config || {};
         return _useSWR__default.default(isDisabled ? null : pathAndInput, (pathAndInput)=>{
-            return nativeClient.query(...pathAndInput);
+            const untypedClient = client.getUntypedClient(nativeClient);
+            return untypedClient.query(...pathAndInput);
         }, swrConfig);
     };
     const useSWRMutation = (path, config)=>{
         const { nativeClient } = useTRPCContext();
         return _useSWRMutation__default.default(path, (path, { arg })=>{
-            return nativeClient.mutation(path, arg);
+            const untypedClient = client.getUntypedClient(nativeClient);
+            return untypedClient.mutation(path, arg);
         }, config);
     };
     let _clientRef = null;
@@ -146,7 +148,8 @@ const useTransformFallback = (data, transformer)=>{
             if (!_clientRef) {
                 _clientRef = createClient();
             }
-            return _clientRef.query(...pathAndInput);
+            const untypedClient = client.getUntypedClient(_clientRef);
+            return untypedClient.query(...pathAndInput);
         });
     };
     const getKey = (pathAndInput, unserialized = false)=>{

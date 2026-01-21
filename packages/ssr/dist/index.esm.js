@@ -107,7 +107,16 @@ function createSSGProxyDecoration(name, state, caller, serialize = (obj)=>obj) {
         const queryKey = getQueryKey(path, input);
         const serializedKey = getKey(queryKey);
         if (lastArg === "fetch") {
-            const promise = caller.query(path, input);
+            // In v11, caller doesn't have .query() method
+            // Instead, we need to traverse the path and call the procedure directly
+            const pathSegments = path ? path.split(".") : [];
+            let procedure = caller;
+            for (const segment of pathSegments){
+                if (segment) {
+                    procedure = procedure[segment];
+                }
+            }
+            const promise = procedure(input);
             state.set(serializedKey, promise);
             return promise.then((v)=>(opt == null ? void 0 : opt.transform) ? serialize(v) : v);
         }

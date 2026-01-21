@@ -1,3 +1,4 @@
+import { getUntypedClient } from '@trpc/client';
 import { createTRPCFlatProxy, createTRPCRecursiveProxy } from '@trpc/server';
 import _useSWRInfinite from 'swr/infinite';
 import { getQueryKey } from '@trpc-swr/client/shared';
@@ -30,7 +31,8 @@ function createSWRInfiniteHooks(trpc) {
             if (config == null ? void 0 : config.isDisabled) return null;
             return getKey(index, previousPageData);
         }, (args)=>{
-            return client.query(path, args);
+            const untypedClient = getUntypedClient(client);
+            return untypedClient.query(path, args);
         }, config);
     };
     /**
@@ -64,7 +66,8 @@ function createSWRInfiniteHooks(trpc) {
             ];
         }, (args)=>{
             const [path, input] = args;
-            return client.query(path, input);
+            const untypedClient = getUntypedClient(client);
+            return untypedClient.query(path, input);
         }, config);
     };
     return {
