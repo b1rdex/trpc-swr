@@ -26,19 +26,19 @@ function createInfiniteProxyDecoration(name, hooks) {
 }
 function createSWRInfiniteHooks(trpc) {
     const useSWRInfinite = (path, getKey, config)=>{
-        const { nativeClient: client } = trpc.useContext();
+        const { nativeClient } = trpc.useContext();
         return _useSWRInfinite((index, previousPageData)=>{
             if (config == null ? void 0 : config.isDisabled) return null;
             return getKey(index, previousPageData);
         }, (args)=>{
-            const untypedClient = getUntypedClient(client);
+            const untypedClient = getUntypedClient(nativeClient);
             return untypedClient.query(path, args);
         }, config);
     };
     /**
 	 * Uses a preset cursor to fetch the next page. Cursor MUST exist on the input object
 	 */ const useCursor = (pathAndInput, getCursor, config)=>{
-        const { nativeClient: client } = trpc.useContext();
+        const { nativeClient } = trpc.useContext();
         return _useSWRInfinite((index, previousPageData)=>{
             if (config == null ? void 0 : config.isDisabled) return null; // Disable
             const [path, input] = pathAndInput;
@@ -66,7 +66,7 @@ function createSWRInfiniteHooks(trpc) {
             ];
         }, (args)=>{
             const [path, input] = args;
-            const untypedClient = getUntypedClient(client);
+            const untypedClient = getUntypedClient(nativeClient);
             return untypedClient.query(path, input);
         }, config);
     };
