@@ -28,7 +28,7 @@ beforeEach(() => {
 
 beforeAll(async () => {
 	PORT = await getPort();
-	const httpServer = createHTTPServer({
+	server = createHTTPServer({
 		router: appRouter,
 		createContext: ({ req, res }: { req: any; res: any }) => ({ req, res }),
 	});
@@ -46,7 +46,7 @@ afterAll(async () => {
 			if (err) {
 				reject(err);
 			} else {
-				res(server);
+				resolve();
 			}
 		});
 	});
