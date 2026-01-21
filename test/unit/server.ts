@@ -1,17 +1,14 @@
 import { TRPCError, initTRPC } from "@trpc/server";
-import { NodeHTTPCreateContextFnOptions } from "@trpc/server/dist/adapters/node-http";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { beforeEach } from "vitest";
 import * as z from "zod";
 import { faker } from "@faker-js/faker";
 
 const t = initTRPC
-	.context<
-		NodeHTTPCreateContextFnOptions<
-			IncomingMessage,
-			ServerResponse<IncomingMessage>
-		>
-	>()
+	.context<{
+		req: IncomingMessage;
+		res: ServerResponse;
+	}>()
 	.create();
 
 export interface User {

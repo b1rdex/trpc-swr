@@ -26,15 +26,17 @@ describe("tRPC.createClient()", () => {
 
 		expect(client).toBeDefined();
 
-		expect(client.query).toBeDefined();
-		expect(client.mutation).toBeDefined();
+		// In v11, TRPCClient is a decorated proxy with typed procedures
+		expect(client.hello).toBeDefined();
+		expect(client.user).toBeDefined();
 	});
 
 	it("Should create the client from the custom config", async () => {
 		expect(client).toBeDefined();
 
-		expect(client.query).toBeDefined();
-		expect(client.mutation).toBeDefined();
+		// In v11, TRPCClient is a decorated proxy with typed procedures
+		expect(client.hello).toBeDefined();
+		expect(client.user).toBeDefined();
 
 		const Page = () => {
 			const { data, isLoading } = trpc.xTest.useSWR();

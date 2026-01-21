@@ -7,6 +7,7 @@ import { RenderOptions, cleanup, render } from "@testing-library/react";
 import { createSWRProxyHooks } from "@trpc-swr/client";
 import { CreateTRPCClientOptions, httpLink } from "@trpc/client";
 import getPort from "get-port";
+import type { Server } from "node:http";
 
 export let PORT: number;
 
@@ -16,7 +17,7 @@ const createAppRouterSWRHooks = (
 	return createSWRProxyHooks<AppRouter>(config);
 };
 
-let server: ReturnType<typeof createHTTPServer>;
+let server: Server;
 export let trpc: ReturnType<typeof createAppRouterSWRHooks>;
 
 beforeEach(() => {
@@ -27,25 +28,26 @@ beforeEach(() => {
 
 beforeAll(async () => {
 	PORT = await getPort();
-	server = createHTTPServer({
+	const httpServer = createHTTPServer({
 		router: appRouter,
 		createContext: ({ req, res }) => ({ req, res }),
 	});
 
-	await new Promise((res) => {
-		server.server.listen(PORT, () => {
-			res(server.server);
+	server = httpServer.listen(PORT);
+	await new Promise<void>((resolve) => {
+		server.once('listening', () => {
+			resolve();
 		});
 	});
 });
 
 afterAll(async () => {
-	await new Promise((res, rej) => {
-		server.server.close((err) => {
+	await new Promise<void>((resolve, reject) => {
+		server.close((err) => {
 			if (err) {
-				rej(err);
+				reject(err);
 			} else {
-				res(server.server);
+				resolve();
 			}
 		});
 	});
@@ -57,7 +59,7 @@ afterEach(() => {
 
 export { appRouter, server };
 
-const customRender: typeof render = (
+const customRender = (
 	ui: React.ReactElement,
 	options: RenderOptions = {},
 ) =>
@@ -71,7 +73,7 @@ const customRender: typeof render = (
 			);
 		},
 		...options,
-	}) as any;
+	});
 
 export * from "@testing-library/react";
 
