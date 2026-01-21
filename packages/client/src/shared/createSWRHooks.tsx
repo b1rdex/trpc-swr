@@ -8,11 +8,11 @@ import {
 import {
   AnyProcedure,
   AnyRouter,
-  ClientDataTransformerOptions,
   inferProcedureInput,
   inferProcedureOutput,
-  ProcedureRouterRecord,
+  TRPCRouterRecord,
 } from "@trpc/server";
+import { DataTransformerOptions } from "@trpc/server/unstable-core-do-not-import";
 import { PropsWithChildren, useContext, useEffect, useState } from "react";
 import _useSWR, {
   preload as _preload,
@@ -76,7 +76,7 @@ export function createSWRHooks<TRouter extends AnyRouter>(
     return _useSWRMutation(
       path,
       (path: any, { arg }: any) => {
-        return nativeClient.mutation(path, arg);
+        return (nativeClient as any).mutation(path, arg);
       },
       config
     );
@@ -170,7 +170,7 @@ export type TRPCProvider<TRouter extends AnyRouter> = React.FC<
   }>
 >;
 
-export type UseSWR<_ extends ProcedureRouterRecord> = <
+export type UseSWR<TRouter extends AnyRouter, _ extends TRPCRouterRecord = TRouter["_def"]["record"]> = <
   TPath extends string,
   TProcedure extends AnyProcedure
 >(
@@ -180,10 +180,10 @@ export type UseSWR<_ extends ProcedureRouterRecord> = <
   }
 ) => SWRResponse<
   inferProcedureOutput<TProcedure>,
-  TRPCClientErrorLike<TProcedure>
+  TRPCClientErrorLike<TRouter>
 >;
 
-export type UseSWRMutation<_ extends ProcedureRouterRecord> = <
+export type UseSWRMutation<TRouter extends AnyRouter, _ extends TRPCRouterRecord = TRouter["_def"]["record"]> = <
   TPath extends string,
   TProcedure extends AnyProcedure,
   TInput = inferProcedureInput<TProcedure>,
@@ -193,24 +193,24 @@ export type UseSWRMutation<_ extends ProcedureRouterRecord> = <
   config: SWRMutationConfiguration<TInput, TOutput>
 ) => SWRMutationResponse<
   TOutput,
-  TRPCClientErrorLike<TProcedure>,
+  TRPCClientErrorLike<TRouter>,
   TPath,
   TInput
 >;
 
 export interface CreateTRPCSWRHooks<
   TRouter extends AnyRouter,
-  TProcedures extends ProcedureRouterRecord = TRouter["_def"]["record"]
+  TProcedures extends TRPCRouterRecord = TRouter["_def"]["record"]
 > {
   Provider: TRPCProvider<TRouter>;
   SWRConfig: React.FC<
     React.ComponentProps<typeof _SWRConfig> & {
-      transformer?: ClientDataTransformerOptions;
+      transformer?: DataTransformerOptions;
     }
   >;
   useContext: () => TRPCContextType<TRouter>;
-  useSWR: UseSWR<TProcedures>;
-  useSWRMutation: UseSWRMutation<TProcedures>;
+  useSWR: UseSWR<TRouter, TProcedures>;
+  useSWRMutation: UseSWRMutation<TRouter, TProcedures>;
   getKey: <PreloadData extends readonly [string] | readonly [string, any]>(
     pathAndInput: PreloadData,
     unserialized?: boolean

@@ -7,9 +7,10 @@ import {
 	AnyRouter,
 	inferProcedureInput,
 	inferProcedureOutput,
-	ProcedureRouterRecord,
+	TRPCRouterRecord,
+	createTRPCFlatProxy,
+	createTRPCRecursiveProxy,
 } from "@trpc/server";
-import { createFlatProxy, createRecursiveProxy } from "@trpc/server/shared";
 import _useSWRInfinite, {
 	SWRInfiniteConfiguration,
 	SWRInfiniteResponse,
@@ -18,6 +19,7 @@ import { GetKey, getQueryKey } from "@trpc-swr/client/shared";
 import type { CreateTRPCSWRProxy } from "@trpc-swr/client";
 
 type DecorateProcedure<
+	TRouter extends AnyRouter,
 	TProcedure extends AnyProcedure,
 	TPath extends string,
 > = TProcedure extends AnyQueryProcedure
@@ -30,14 +32,14 @@ type DecorateProcedure<
 				opts?: SWRInfiniteConfiguration<TData> & {
 					isDisabled?: boolean;
 				},
-			) => SWRInfiniteResponse<TData, TRPCClientErrorLike<TProcedure>>;
+			) => SWRInfiniteResponse<TData, TRPCClientErrorLike<TRouter>>;
 			useCursor: <TData = inferProcedureOutput<TProcedure>>(
 				input: inferProcedureInput<TProcedure>,
 				getCursor: (previousPageData: TData | null) => any,
 				opts?: SWRInfiniteConfiguration<TData> & {
 					isDisabled?: boolean;
 				},
-			) => SWRInfiniteResponse<TData, TRPCClientErrorLike<TProcedure>>;
+			) => SWRInfiniteResponse<TData, TRPCClientErrorLike<TRouter>>;
 
 			preload: (input: inferProcedureInput<TProcedure>) => Promise<void>;
 			getKey: GetKey<TProcedure, TPath>;
@@ -48,27 +50,29 @@ type DecorateProcedure<
  * @internal
  */
 export type DecoratedProcedureRecord<
-	TProcedures extends ProcedureRouterRecord,
+	TRouter extends AnyRouter,
+	TProcedures extends TRPCRouterRecord,
 	TPath extends string = "",
 > = {
 	[TKey in keyof TProcedures]: TProcedures[TKey] extends AnyRouter
 		? DecoratedProcedureRecord<
+				TProcedures[TKey],
 				TProcedures[TKey]["_def"]["record"],
 				`${TPath}${TKey & string}.`
 		  >
 		: TProcedures[TKey] extends AnyProcedure
-		? DecorateProcedure<TProcedures[TKey], `${TPath}${TKey & string}`>
+		? DecorateProcedure<TRouter, TProcedures[TKey], `${TPath}${TKey & string}`>
 		: never;
 };
 
 export type CreateTRPCInfiniteProxy<TRouter extends AnyRouter> =
-	DecoratedProcedureRecord<TRouter["_def"]["record"]>;
+	DecoratedProcedureRecord<TRouter, TRouter["_def"]["record"]>;
 
 function createInfiniteProxyDecoration(
 	name: string,
 	hooks: CreateSWRInfiniteHooks,
 ) {
-	return createRecursiveProxy((opts) => {
+	return createTRPCRecursiveProxy((opts) => {
 		const args = opts.args;
 		const pathCopy = [name, ...opts.path];
 
@@ -183,11 +187,11 @@ interface CreateSWRInfiniteHooks {
 export function createInfiniteProxyInternal<TRouter extends AnyRouter>(
 	hooks: CreateSWRInfiniteHooks,
 ): CreateTRPCInfiniteProxy<TRouter> {
-	return createFlatProxy<CreateTRPCInfiniteProxy<TRouter>>((key) => {
+	return createTRPCFlatProxy<CreateTRPCInfiniteProxy<TRouter>>((key) => {
 		if (key in hooks) {
 			return hooks[key as keyof typeof hooks];
 		}
-		return createInfiniteProxyDecoration(key, hooks);
+		return createInfiniteProxyDecoration(key as string, hooks);
 	});
 }
 

@@ -2,13 +2,14 @@ import {
 	AnyProcedure,
 	AnyQueryProcedure,
 	AnyRouter,
-	ClientDataTransformerOptions,
 	inferProcedureInput,
 	inferProcedureOutput,
 	inferRouterContext,
-	ProcedureRouterRecord,
+	TRPCRouterRecord,
+	createTRPCFlatProxy,
+	createTRPCRecursiveProxy,
 } from "@trpc/server";
-import { createFlatProxy, createRecursiveProxy } from "@trpc/server/shared";
+import { DataTransformerOptions } from "@trpc/server/unstable-core-do-not-import";
 
 import type { GetKey, GetQueryKey } from "@trpc-swr/client/shared";
 import { unstable_serialize } from "./serialize";
@@ -42,7 +43,7 @@ type DecorateProcedure<
  * @internal
  */
 export type DecoratedProcedureRecord<
-	TProcedures extends ProcedureRouterRecord,
+	TProcedures extends TRPCRouterRecord,
 	TPath extends string = "",
 > = {
 	[TKey in keyof TProcedures]: TProcedures[TKey] extends AnyRouter
@@ -67,7 +68,7 @@ function createSSGProxyDecoration(
 	caller: Caller,
 	serialize: (obj: unknown) => unknown = (obj) => obj,
 ) {
-	return createRecursiveProxy((opts) => {
+	return createTRPCRecursiveProxy((opts) => {
 		const args = opts.args;
 		const pathCopy = [name, ...opts.path];
 
@@ -81,10 +82,10 @@ function createSSGProxyDecoration(
 		const serializedKey = getKey(queryKey);
 
 		if (lastArg === "fetch") {
-			const promise = caller.query(path, input);
+			const promise = (caller as any).query(path, input);
 
 			state.set(serializedKey, promise);
-			return promise.then((v) => ((opt as any)?.transform ? serialize(v) : v));
+			return promise.then((v: any) => ((opt as any)?.transform ? serialize(v) : v));
 		}
 
 		if (lastArg === "getKey") return serializedKey;
@@ -118,7 +119,7 @@ export function createProxySSGHelpers<TRouter extends AnyRouter>({
 	const state = new Map<string, any>();
 
 	// Auto infer transformer from router
-	const transformer: undefined | ClientDataTransformerOptions =
+	const transformer: undefined | DataTransformerOptions =
 		router._def._config.transformer;
 
 	const caller = router.createCaller(ctx);
@@ -128,7 +129,7 @@ export function createProxySSGHelpers<TRouter extends AnyRouter>({
 		? ("input" in transformer ? transformer.input : transformer).serialize
 		: (obj: unknown) => obj;
 
-	return createFlatProxy<ProxySSGHelpers<TRouter>>((key) => {
+	return createTRPCFlatProxy<ProxySSGHelpers<TRouter>>((key) => {
 		if (key === "dehydrate") {
 			return async () => {
 				const asyncEntries = await Promise.all(
@@ -141,6 +142,6 @@ export function createProxySSGHelpers<TRouter extends AnyRouter>({
 			};
 		}
 
-		return createSSGProxyDecoration(key, state, caller, serialize);
+		return createSSGProxyDecoration(key as string, state, caller, serialize);
 	});
 }

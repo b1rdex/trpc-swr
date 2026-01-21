@@ -1,10 +1,10 @@
 /* eslint-disable unicorn/filename-case */
-import type { ClientDataTransformerOptions } from "@trpc/server";
+import type { DataTransformerOptions } from "@trpc/server/unstable-core-do-not-import";
 import { useMemo } from "react";
 
 export const useTransformFallback = (
   data: unknown,
-  transformer?: ClientDataTransformerOptions
+  transformer?: DataTransformerOptions
 ) => {
   return useMemo(() => {
     if (!data) {

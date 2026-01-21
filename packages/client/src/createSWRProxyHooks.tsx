@@ -6,9 +6,10 @@ import {
   AnyRouter,
   inferProcedureInput,
   inferProcedureOutput,
-  ProcedureRouterRecord,
+  TRPCRouterRecord,
+  createTRPCFlatProxy,
+  createTRPCRecursiveProxy,
 } from "@trpc/server";
-import { createFlatProxy, createRecursiveProxy } from "@trpc/server/shared";
 import { SWRConfiguration, SWRResponse } from "swr";
 import type {
   SWRMutationConfiguration,
@@ -20,6 +21,7 @@ import type { CreateTRPCSWRHooks, TRPCProvider } from "./shared/createSWRHooks";
 import type { CreateClient, GetKey } from "./shared/types";
 
 type DecorateProcedure<
+  TRouter extends AnyRouter,
   TProcedure extends AnyProcedure,
   TPath extends string
 > = TProcedure extends AnyQueryProcedure
@@ -32,7 +34,7 @@ type DecorateProcedure<
         opts?: TConfig & {
           isDisabled?: boolean;
         }
-      ) => SWRResponse<TData, TRPCClientErrorLike<TProcedure>, TConfig>;
+      ) => SWRResponse<TData, TRPCClientErrorLike<TRouter>, TConfig>;
 
       preload: (input: inferProcedureInput<TProcedure>) => Promise<void>;
       getKey: GetKey<TProcedure, TPath>;
@@ -42,7 +44,7 @@ type DecorateProcedure<
       useSWRMutation: <
         TData = inferProcedureOutput<TProcedure>,
         TMutationInput = inferProcedureInput<TProcedure>,
-        TError = TRPCClientErrorLike<TProcedure>
+        TError = TRPCClientErrorLike<TRouter>
       >(
         opts?: SWRMutationConfiguration<
           TData,
@@ -61,16 +63,18 @@ type DecorateProcedure<
  * @internal
  */
 export type DecoratedProcedureRecord<
-  TProcedures extends ProcedureRouterRecord,
+  TRouter extends AnyRouter,
+  TProcedures extends TRPCRouterRecord,
   TPath extends string = ""
 > = {
   [TKey in keyof TProcedures]: TProcedures[TKey] extends AnyRouter
     ? DecoratedProcedureRecord<
+        TProcedures[TKey],
         TProcedures[TKey]["_def"]["record"],
         `${TPath}${TKey & string}.`
       >
     : TProcedures[TKey] extends AnyProcedure
-    ? DecorateProcedure<TProcedures[TKey], `${TPath}${TKey & string}`>
+    ? DecorateProcedure<TRouter, TProcedures[TKey], `${TPath}${TKey & string}`>
     : never;
 };
 
@@ -79,7 +83,7 @@ export type CreateTRPCSWRProxy<TRouter extends AnyRouter> = {
   useContext: CreateTRPCSWRHooks<TRouter>["useContext"];
   Provider: TRPCProvider<TRouter>;
   SWRConfig: CreateTRPCSWRHooks<TRouter>["SWRConfig"];
-} & DecoratedProcedureRecord<TRouter["_def"]["record"]>;
+} & DecoratedProcedureRecord<TRouter, TRouter["_def"]["record"]>;
 
 /**
  * Create proxy for decorating procedures
@@ -89,7 +93,7 @@ export function createSWRProxyDecoration<TRouter extends AnyRouter>(
   name: string,
   hooks: CreateTRPCSWRHooks<TRouter>
 ) {
-  return createRecursiveProxy((opts) => {
+  return createTRPCRecursiveProxy((opts) => {
     const args = opts.args;
 
     const pathCopy = [name, ...opts.path];
@@ -136,10 +140,10 @@ export function createSWRProxyHooksInternal<TRouter extends AnyRouter>(
 ) {
   type CreateSWRInternalProxy = CreateTRPCSWRProxy<TRouter>;
 
-  return createFlatProxy<CreateSWRInternalProxy>((key) => {
+  return createTRPCFlatProxy<CreateSWRInternalProxy>((key) => {
     if (key in hooks) {
       return hooks[key as keyof typeof hooks];
     }
-    return createSWRProxyDecoration(key, hooks);
+    return createSWRProxyDecoration(key as string, hooks);
   });
 }

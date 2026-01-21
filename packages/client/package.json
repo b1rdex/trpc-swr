@@ -38,16 +38,16 @@
   "license": "MIT",
   "devDependencies": {
     "@rspack/cli": "^0.2.3",
-    "@trpc/client": "^10.32.0",
-    "@trpc/server": "^10.32.0",
+    "@trpc/client": "^11.0.0",
+    "@trpc/server": "^11.0.0",
     "bunchee": "3.4.1",
     "config": "workspace:*",
     "react": "^18.2.0",
     "swr": "^2.2.0"
   },
   "peerDependencies": {
-    "@trpc/client": "^10.32.0",
-    "@trpc/server": "^10.32.0",
+    "@trpc/client": "^11.0.0",
+    "@trpc/server": "^11.0.0",
     "react": "^18.2.0",
     "swr": "^2.2.0"
   }
