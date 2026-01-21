@@ -7,7 +7,7 @@ it("Makes infinite query using custom page size", async () => {
 
   const Component = () => {
     const { data, setSize, size } = infinite.people.getMany.use(
-      (index: number, previousPageData: any) => {
+      (index, previousPageData) => {
         if (index !== 0 && !previousPageData?.length) return null; // Last page
         return { limit: 1, page: index };
       }
@@ -17,14 +17,14 @@ it("Makes infinite query using custom page size", async () => {
       return <div>Loading...</div>;
     }
 
-    const people = data.flatMap((page: any) => page);
+    const people = data.flatMap((page) => page);
 
     const hasMore = (data.at(-1) ?? []).length > 0;
 
     return (
       <>
         <div>
-          {people.map((user: any, index: number) => {
+          {people.map((user, index) => {
             return (
               <p key={user.name} data-testid={String(index)}>
                 {user.name}
