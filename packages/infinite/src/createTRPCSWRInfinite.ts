@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/filename-case */
 /* eslint-disable unicorn/prevent-abbreviations */
-import { TRPCClientErrorLike } from "@trpc/client";
+import { TRPCClientErrorLike, getUntypedClient } from "@trpc/client";
 import {
 	AnyProcedure,
 	AnyQueryProcedure,
@@ -106,7 +106,7 @@ export function createSWRInfiniteHooks<TRouter extends AnyRouter>(
 			isDisabled?: boolean;
 		},
 	) => {
-		const { nativeClient: client } = trpc.useContext();
+		const { nativeClient } = trpc.useContext();
 
 		return _useSWRInfinite(
 			(index, previousPageData) => {
@@ -114,7 +114,8 @@ export function createSWRInfiniteHooks<TRouter extends AnyRouter>(
 				return getKey(index, previousPageData);
 			},
 			(args) => {
-				return client.query(path, args);
+				const untypedClient = getUntypedClient(nativeClient);
+				return untypedClient.query(path, args);
 			},
 			config,
 		);
@@ -130,7 +131,7 @@ export function createSWRInfiniteHooks<TRouter extends AnyRouter>(
 			isDisabled?: boolean;
 		},
 	) => {
-		const { nativeClient: client } = trpc.useContext();
+		const { nativeClient } = trpc.useContext();
 
 		return _useSWRInfinite(
 			(index, previousPageData) => {
@@ -168,7 +169,8 @@ export function createSWRInfiniteHooks<TRouter extends AnyRouter>(
 			},
 			(args) => {
 				const [path, input] = args;
-				return client.query(path, input);
+				const untypedClient = getUntypedClient(nativeClient);
+				return untypedClient.query(path, input);
 			},
 			config,
 		);

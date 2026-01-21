@@ -19,6 +19,9 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
+    "@types/node": "^25.0.9",
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.6",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "@vitest/ui": "^0.32.2",
     "config": "workspace:*",
@@ -37,8 +40,8 @@
     "@trpc-swr/infinite": "workspace:^",
     "@trpc-swr/next": "workspace:*",
     "@trpc-swr/ssr": "workspace:*",
-    "@trpc/client": "^10.32.0",
-    "@trpc/server": "^10.32.0",
+    "@trpc/client": "^11.0.0",
+    "@trpc/server": "^11.0.0",
     "swr": "^2.2.0"
   }
 }

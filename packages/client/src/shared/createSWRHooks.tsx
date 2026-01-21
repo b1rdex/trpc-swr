@@ -4,6 +4,7 @@ import {
   createTRPCProxyClient,
   TRPCClient,
   TRPCClientErrorLike,
+  getUntypedClient,
 } from "@trpc/client";
 import {
   AnyProcedure,
@@ -66,7 +67,8 @@ export function createSWRHooks<TRouter extends AnyRouter>(
     return _useSWR(
       isDisabled ? null : pathAndInput,
       (pathAndInput: ReturnType<GetQueryKey>) => {
-        return (nativeClient as any).query(...pathAndInput);
+        const untypedClient = getUntypedClient(nativeClient);
+        return untypedClient.query(...pathAndInput);
       },
       swrConfig
     );
@@ -80,7 +82,8 @@ export function createSWRHooks<TRouter extends AnyRouter>(
     return _useSWRMutation(
       path,
       (path: any, { arg }: any) => {
-        return (nativeClient as any).mutation(path, arg);
+        const untypedClient = getUntypedClient(nativeClient);
+        return untypedClient.mutation(path, arg);
       },
       config
     );
@@ -126,7 +129,8 @@ export function createSWRHooks<TRouter extends AnyRouter>(
       if (!_clientRef) {
         _clientRef = createClient();
       }
-      return (_clientRef as any).query(...pathAndInput);
+      const untypedClient = getUntypedClient(_clientRef);
+      return untypedClient.query(...pathAndInput);
     });
   };
 

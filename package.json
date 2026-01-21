@@ -28,7 +28,9 @@
   },
   "pnpm": {
     "overrides": {
-      "@swc/helpers": "latest"
+      "@swc/helpers": "latest",
+      "@types/node": "~20.17.0",
+      "@types/react": "^18.3.0"
     }
   },
   "repository": {
