@@ -40,7 +40,7 @@
     "@rspack/cli": "^0.2.3",
     "@trpc/client": "^11.0.0",
     "@trpc/server": "^11.0.0",
-    "bunchee": "3.4.1",
+    "bunchee": "^6.9.4",
     "config": "workspace:*",
     "react": "^18.2.0",
     "swr": "^2.2.0"

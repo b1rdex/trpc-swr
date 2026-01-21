@@ -50,13 +50,12 @@ export type DecoratedProcedureRecord<
 	TProcedures extends TRPCRouterRecord,
 	TPath extends string = "",
 > = {
-	[TKey in keyof TProcedures]: TProcedures[TKey] extends AnyRouter
-		? DecoratedProcedureRecord<
-				TProcedures[TKey]["_def"]["record"],
-				`${TPath}${TKey & string}.`
-		  >
-		: TProcedures[TKey] extends AnyProcedure
-		? DecorateProcedure<TProcedures[TKey], `${TPath}${TKey & string}`>
+	[TKey in keyof TProcedures]: TProcedures[TKey] extends infer $Value
+		? $Value extends AnyProcedure
+			? DecorateProcedure<$Value, `${TPath}${TKey & string}`>
+			: $Value extends TRPCRouterRecord
+			? DecoratedProcedureRecord<$Value, `${TPath}${TKey & string}.`>
+			: never
 		: never;
 };
 

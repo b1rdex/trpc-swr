@@ -18,8 +18,8 @@
     "require": "./dist/index.js"
   },
   "scripts": {
-    "dev": "bunchee index.ts -w",
-    "build": "bunchee index.ts",
+    "dev": "bunchee -w",
+    "build": "bunchee",
     "typecheck": "tsc --noEmit"
   },
   "files": [
@@ -34,7 +34,7 @@
     "@trpc-swr/client": "workspace:*",
     "@trpc/client": "^11.0.0",
     "@trpc/server": "^11.0.0",
-    "bunchee": "3.4.1",
+    "bunchee": "^6.9.4",
     "config": "workspace:*"
   },
   "peerDependencies": {
