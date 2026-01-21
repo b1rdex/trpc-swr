@@ -7,7 +7,7 @@ it("Makes infinite query using custom page size", async () => {
 
 	const Component = () => {
 		const { data, setSize, size } = infinite.people.getMany.use(
-			(index, previousPageData) => {
+			(index: number, previousPageData: any) => {
 				if (index !== 0 && !previousPageData?.length) return null; // Last page
 				return { limit: 1, page: index };
 			},
@@ -17,14 +17,14 @@ it("Makes infinite query using custom page size", async () => {
 			return <div>Loading...</div>;
 		}
 
-		const people = data.flatMap((page) => page);
+		const people = data.flatMap((page: any) => page);
 
 		const hasMore = (data.at(-1) ?? []).length > 0;
 
 		return (
 			<>
 				<div>
-					{people.map((user, index) => {
+					{people.map((user: any, index: number) => {
 						return (
 							<p key={user.name} data-testid={String(index)}>
 								{user.name}
@@ -74,20 +74,20 @@ it("Makes infinite query using custom cursor", async () => {
 	const Component = () => {
 		const { data, setSize, size } = infinite.people.byCursor.useCursor(
 			{},
-			(data) => data?.nextCursor,
+			(data: any) => data?.nextCursor,
 		);
 
 		if (!data) {
 			return <div>Loading...</div>;
 		}
 
-		const people = data.flatMap((page) => page.items);
+		const people = data.flatMap((page: any) => page.items);
 		const hasMore = !!data.at(-1)?.nextCursor;
 
 		return (
 			<>
 				<div>
-					{people.map((user, index) => {
+					{people.map((user: any, index: number) => {
 						return (
 							<p key={user.name} data-testid={String(index)}>
 								{user.name}

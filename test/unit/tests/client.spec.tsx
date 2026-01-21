@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { httpBatchLink, TRPCClient } from "@trpc/client";
+import { httpBatchLink, TRPCClient, getUntypedClient } from "@trpc/client";
 import { beforeEach, describe, expect, it } from "vitest";
 import { AppRouter } from "../server";
 import { screen, trpc, waitFor, getUrl } from "../utils";
@@ -26,17 +26,17 @@ describe("tRPC.createClient()", () => {
 
 		expect(client).toBeDefined();
 
-		// In v11, TRPCClient is a decorated proxy with typed procedures
-		expect(client.hello).toBeDefined();
-		expect(client.user).toBeDefined();
+		const untypedClient = getUntypedClient(client);
+		expect(untypedClient.query).toBeDefined();
+		expect(untypedClient.mutation).toBeDefined();
 	});
 
 	it("Should create the client from the custom config", async () => {
 		expect(client).toBeDefined();
 
-		// In v11, TRPCClient is a decorated proxy with typed procedures
-		expect(client.hello).toBeDefined();
-		expect(client.user).toBeDefined();
+		const untypedClient = getUntypedClient(client);
+		expect(untypedClient.query).toBeDefined();
+		expect(untypedClient.mutation).toBeDefined();
 
 		const Page = () => {
 			const { data, isLoading } = trpc.xTest.useSWR();

@@ -30,13 +30,12 @@ beforeAll(async () => {
 	PORT = await getPort();
 	const httpServer = createHTTPServer({
 		router: appRouter,
-		createContext: ({ req, res }) => ({ req, res }),
+		createContext: ({ req, res }: { req: any; res: any }) => ({ req, res }),
 	});
 
-	server = httpServer.listen(PORT);
-	await new Promise<void>((resolve) => {
-		server.once('listening', () => {
-			resolve();
+	await new Promise((res) => {
+		server.listen(PORT, () => {
+			res(server);
 		});
 	});
 });
@@ -47,7 +46,7 @@ afterAll(async () => {
 			if (err) {
 				reject(err);
 			} else {
-				resolve();
+				res(server);
 			}
 		});
 	});
@@ -61,8 +60,8 @@ export { appRouter, server };
 
 const customRender = (
 	ui: React.ReactElement,
-	options: RenderOptions = {},
-) =>
+	options?: RenderOptions,
+): any =>
 	render(ui, {
 		wrapper: ({ children }) => {
 			const [client] = useState(() => trpc.createClient());

@@ -91,7 +91,7 @@ describe("[endpoint].preload", () => {
 			const [show, setShow] = useState(false);
 			const [count, setCount] = useState<any>(0);
 			useEffect(() => {
-				trpc.preloadTest.exec.preload().then((count) => {
+				trpc.preloadTest.exec.preload().then((count: any) => {
 					setCount((count as any).count);
 				});
 			}, []);

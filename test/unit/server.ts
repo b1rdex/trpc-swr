@@ -7,7 +7,7 @@ import { faker } from "@faker-js/faker";
 const t = initTRPC
 	.context<{
 		req: IncomingMessage;
-		res: ServerResponse;
+		res: ServerResponse<IncomingMessage>;
 	}>()
 	.create();
 

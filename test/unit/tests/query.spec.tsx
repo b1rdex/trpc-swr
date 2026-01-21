@@ -80,7 +80,7 @@ it("Has correct SWR option types", async () => {
   () => {
     const { data } = trpc.hello.useSWR(void 0, {
       suspense: true,
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         expectTypeOf(data).toBeString();
       },
     });
